@@ -23,6 +23,7 @@
 #include <sys/select.h> 
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
@@ -59,7 +60,7 @@ pid_t popen2(const char **command, int *infp, int *outfp)
         close(p_stdout[READ]);
         dup2(p_stdout[WRITE], WRITE);
 
-        execvp((const char *)*command, command);
+        execvp((const char *)*command, (char * const *)command);
         perror("execvp");
         exit(1);
     }
@@ -279,16 +280,16 @@ int main(int argc, char* argv[])
                                 strcat(location_buf, "location=");
                                 strcat(location_buf, FIFO_PATH);
 #ifdef VPUDEC
-                                const char *command[] = {"gst-launch-0.10", "filesrc", location_buf, "do-timestamp=true", "!", "video\/x-h264,width=800,height=480,framerate=30\/1", "!", "vpudec", "framedrop=true", "frame-plus=1", "low-latency=true", "!", gst_sink, NULL};
+                                const char *command[] = {"gst-launch-0.10", "filesrc", location_buf, "do-timestamp=true", "!", "video\\/x-h264,width=800,height=480,framerate=30\\/1", "!", "vpudec", "framedrop=true", "frame-plus=1", "low-latency=true", "!", gst_sink, NULL};
 #else
                                 const char *command[] = {"gst-launch-1.0", "filesrc", location_buf, "do-timestamp=true", "!", "h264parse", "!", "decodebin", "!", gst_sink, NULL};
 #endif
 #else
 #ifdef VPUDEC
-                                const char *command[] = {"gst-launch-0.10", "fdsrc", "do-timestamp=true", "!", "video\/x-h264,width=800,height=480,framerate=30\/1", "!", "vpudec", "framedrop=true", "frame-plus=1", "low-latency=true", "!", gst_sink, NULL};
+                                const char *command[] = {"gst-launch-0.10", "fdsrc", "do-timestamp=true", "!", "video\\/x-h264,width=800,height=480,framerate=30\\/1", "!", "vpudec", "framedrop=true", "frame-plus=1", "low-latency=true", "!", gst_sink, NULL};
 #else
                                 const char *command[] = {"gst-launch-1.0", "fdsrc", "do-timestamp=true", "!", "h264parse", "!", "decodebin", "!", gst_sink, NULL};
-                                //const char *command[] = {"gst-launch-1.0", "fdsrc", "!", "video\/x-h264,width=800,height=480,framerate=0\/1,stream-format=avc", "!", "avdec_h264", "!", gst_sink, NULL};
+                                //const char *command[] = {"gst-launch-1.0", "fdsrc", "!", "video\\/x-h264,width=800,height=480,framerate=0\\/1,stream-format=avc", "!", "avdec_h264", "!", gst_sink, NULL};
 #endif
 #endif
                                 gst_pid = popen2(command, &gst_in_fp, &gst_out_fp);
@@ -368,8 +369,8 @@ int main(int argc, char* argv[])
                                 strcat(location_buf, FIFO_PATH);
 #ifdef VPUDEC
                                 char mime_buf[70] = {0};
-                                snprintf(mime_buf, 70, "video\/x-h264,width=%d,height=%d,framerate=30\/1", width, height);
-                                //snprintf(mime_buf, 70, "video\/x-h264,width=%d,height=%d,framerate=30\/1,stream-format=avc", width, height);
+                                snprintf(mime_buf, 70, "video\\/x-h264,width=%d,height=%d,framerate=30\\/1", width, height);
+                                //snprintf(mime_buf, 70, "video\\/x-h264,width=%d,height=%d,framerate=30\\/1,stream-format=avc", width, height);
                                 printf("Using cap: %s\n", mime_buf);
                                 const char *command[] = {"gst-launch-0.10", "filesrc", location_buf, "do-timestamp=true", "!", mime_buf, "!", "vpudec", "framedrop=true", "frame-plus=1", "low-latency=true", "!", gst_sink, NULL};
 #else
@@ -378,8 +379,8 @@ int main(int argc, char* argv[])
 #else
 #ifdef VPUDEC
                                 char mime_buf[70] = {0};
-                                snprintf(mime_buf, 70, "video\/x-h264,width=%d,height=%d,framerate=30\/1", width, height);
-                                //snprintf(mime_buf, 70, "video\/x-h264,width=%d,height=%d,framerate=30\/1,stream-format=avc", width, height);
+                                snprintf(mime_buf, 70, "video\\/x-h264,width=%d,height=%d,framerate=30\\/1", width, height);
+                                //snprintf(mime_buf, 70, "video\\/x-h264,width=%d,height=%d,framerate=30\\/1,stream-format=avc", width, height);
                                 printf("Using cap: %s\n", mime_buf);
                                 const char *command[] = {"gst-launch-0.10", "fdsrc", "do-timestamp=true", "!", mime_buf, "!", "vpudec", "framedrop=false", "frame-plus=1", "low-latency=true", "!", gst_sink, NULL};
 #else
